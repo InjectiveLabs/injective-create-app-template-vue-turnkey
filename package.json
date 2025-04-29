@@ -1,0 +1,23 @@
+{
+  "name": "injective-create-app-template-vue-turnkey",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "app",
+    "server"
+  ],
+  "description": "This is a template project that demonstrates how to build a Vue.js application with Injective Protocol integration using Turnkey for wallet management. The project consists of a frontend Vue application and a backend server.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "concurrently \"yarn workspace app dev\" \"yarn workspace server dev\"",
+    "dev:app": "yarn workspace app dev",
+    "dev:server": "yarn workspace server dev"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
