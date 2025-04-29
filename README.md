@@ -1,4 +1,23 @@
-# Injective Create App Template with Vue and Turnkey
+# 🌟 Injective's Create App Template with Vue and Turnkey
+
+---
+
+## 📜 Contribution
+
+General contribution guidelines can be found on the [Contributing](CONTRIBUTING.md) page. There can be a package-specific contribution guides, please make sure you read them before you open a PR.
+
+---
+
+## ⛑ Support
+
+Reach out to us at one of the following places!
+
+- Website at <a href="https://injective.com" target="_blank">`injective.com`</a>
+- Twitter at <a href="https://twitter.com/Injective_" target="_blank">`@Injective`</a>
+- Discord at <a href="https://discord.com/invite/NK4qdbv" target="_blank">`Discord`</a>
+- Telegram at <a href="https://t.me/joininjective" target="_blank">`Telegram`</a>
+
+---
 
 This is a template project that demonstrates how to build a Vue.js application with Injective Protocol integration using Turnkey for wallet management. The project consists of a frontend Vue application and a backend server.
 
@@ -125,6 +144,18 @@ Please follow the standard Git workflow:
 2. Make your changes
 3. Submit a pull request
 
-## License
+## 🔓 License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+Copyright © 2021 - 2022 Injective Labs Inc. (https://injectivelabs.org/)
+
+<a href="https://iili.io/mNneZN.md.png"><img src="https://iili.io/mNneZN.md.png" style="width: 300px; max-width: 100%; height: auto" />
+
+Originally released by Injective Labs Inc. under: <br />
+Apache License <br />
+Version 2.0, January 2004 <br />
+http://www.apache.org/licenses/
+
+<p>&nbsp;</p>
+<div align="center">
+  <sub><em>Powering the future of decentralized finance.</em></sub>
+</div>
