@@ -1,8 +1,8 @@
 import type { MsgBroadcaster } from '@injectivelabs/wallet-core'
 import type {
-  TurnkeyWalletStrategy,
-  TurnkeyStatus,
-} from '@injectivelabs/wallet-turnkey/src/index.ts'
+  TurnkeyWalletStrategy
+} from '@injectivelabs/wallet-turnkey'
+import type {TurnkeyStatus} from '@injectivelabs/wallet-base'
 import { ref } from 'vue'
 
 export const turnkeyStrategy = ref<TurnkeyWalletStrategy | null>(null)

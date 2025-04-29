@@ -24,18 +24,23 @@ const turnkeyReadyAndLoggedIn = computed(() => {
 
 onMounted(async () => {
   const _turnkeyStrategy = new TurnkeyWallet({
-    onStatusChange(status) {
-      turnkeyStatus.value = status;
-    },
     chainId: injectiveClients.chainId,
     ethereumOptions: {
       ethereumChainId: injectiveClients.ethereumChainId!,
     },
-    metadata: {
-      turnkeyAuthIframeContainerId,
-      defaultOrganizationId: import.meta.env
-        .VITE_TURNKEY_DEFAULT_ORGANIZATION_ID,
-      apiBaseUrl: "https://api.turnkey.com",
+    options: {
+      metadata: {
+        turnkey: {
+          turnkeyAuthIframeContainerId,
+          defaultOrganizationId: import.meta.env
+            .VITE_TURNKEY_DEFAULT_ORGANIZATION_ID,
+          apiBaseUrl: "https://api.turnkey.com",
+          onStatusChange(status) {
+            console.log("🪵 | onStatusChange | status:", status);
+            turnkeyStatus.value = status;
+          },
+        },
+      },
     },
   });
 
