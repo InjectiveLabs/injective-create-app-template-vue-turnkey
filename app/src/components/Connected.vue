@@ -1,19 +1,25 @@
 <script lang="ts" setup>
-import { getEthereumAddress, MsgSend } from '@injectivelabs/sdk-ts'
-import { onMounted, ref } from 'vue'
-import { address, turnkeyStrategy, broadcaster, oidcToken } from '../reactives'
-import { generateGoogleUrl } from '../utils'
+import { getEthereumAddress, MsgSend } from "@injectivelabs/sdk-ts";
+import { ref } from "vue";
+import {
+  address,
+  broadcaster,
+  walletStatus,
+  walletStrategy,
+} from "../reactives";
+
+import { setLocalStorageStrategy } from "../utils";
 
 const msgValues = ref({
   to: address.value,
   from: address.value,
-  amount: '1000000',
-  denom: 'factory/inj1dm0yt646fsjsvznjz2twyht9ytcmwz3aqydjjp/RealTrumPepe',
-})
+  amount: "1000000",
+  denom: "factory/inj1dm0yt646fsjsvznjz2twyht9ytcmwz3aqydjjp/RealTrumPepe",
+});
 
-const txHash = ref('')
+const txHash = ref("");
 
-const isLoading = ref(false)
+const isLoading = ref(false);
 
 const handleSendClick = async () => {
   if (
@@ -22,18 +28,18 @@ const handleSendClick = async () => {
     !msgValues.value.amount ||
     !msgValues.value.denom
   ) {
-    throw new Error('Invalid input')
+    throw new Error("Invalid input");
   }
 
   if (!address.value) {
-    throw new Error('Address not initialized')
+    throw new Error("Address not initialized");
   }
 
   if (!broadcaster.value) {
-    throw new Error('Broadcaster not initialized')
+    throw new Error("Broadcaster not initialized");
   }
 
-  isLoading.value = true
+  isLoading.value = true;
 
   const msgs = MsgSend.fromJSON({
     srcInjectiveAddress: msgValues.value.from,
@@ -44,88 +50,37 @@ const handleSendClick = async () => {
         amount: msgValues.value.amount,
       },
     ],
-  })
+  });
 
   try {
     const result = await broadcaster.value.broadcastWithFeeDelegation({
       msgs,
       injectiveAddress: address.value,
       ethereumAddress: getEthereumAddress(address.value),
-    })
+    });
 
-    console.log('🪵 | result:', result)
+    console.log("🪵 | result:", result);
     if (result.txHash) {
-      txHash.value = result.txHash
+      txHash.value = result.txHash;
     }
   } catch (error) {
-    console.error('Error sending tx', error)
+    console.error("Error sending tx", error);
   } finally {
-    isLoading.value = false
+    isLoading.value = false;
   }
+};
+
+async function disconnect() {
+  await walletStrategy.value?.disconnect();
+  walletStatus.value = "ready";
+  setLocalStorageStrategy(undefined);
 }
-
-async function deleteOrganization() {
-  if (!turnkeyStrategy.value?.authIframeClient) {
-    throw new Error('Auth iframe client not initialized')
-  }
-
-  const result =
-    await turnkeyStrategy.value.authIframeClient.deleteSubOrganization({
-      deleteWithoutExport: true,
-      organizationId: turnkeyStrategy.value.organizationId,
-      timestampMs: Date.now().toString(),
-    })
-  console.log('🪵 | deleteOrganization | result:', result)
-}
-
-async function addGoogleOAuth() {
-  if (!turnkeyStrategy.value?.authIframeClient) {
-    throw new Error('Auth iframe client not initialized')
-  }
-  const nonce = await turnkeyStrategy.value.generateOAuthNonce()
-
-  const googleUrl = generateGoogleUrl(nonce)
-
-  window.location.href = googleUrl
-}
-
-async function updateUserWithToken(oidcToken: string) {
-  if (!turnkeyStrategy.value?.authIframeClient) {
-    throw new Error('Auth iframe client not initialized')
-  }
-
-  const user = await turnkeyStrategy.value.turnkey.getCurrentUser()
-
-  if (!user) {
-    throw new Error('User not found')
-  }
-
-  const result =
-    await turnkeyStrategy.value.authIframeClient.createOauthProviders({
-      organizationId: turnkeyStrategy.value.organizationId,
-      userId: user?.userId,
-      oauthProviders: [{ providerName: 'google', oidcToken }],
-    })
-
-  console.log('🪵 | updateUserWithToken | result:', result)
-
-  // Clear all params from URL either way
-  window.history.replaceState({}, '', window.location.pathname)
-}
-
-onMounted(async () => {
-  if (oidcToken.value) {
-    updateUserWithToken(oidcToken.value)
-  }
-})
 </script>
 
 <template>
   <h2>Connected!</h2>
   <div class="actions">
-    <button @click="turnkeyStrategy?.disconnect()">Logout</button>
-    <button @click="deleteOrganization">Delete Organization (Account)</button>
-    <button @click="addGoogleOAuth">Add Google OAuth</button>
+    <button @click="disconnect()">Logout</button>
   </div>
   <div>
     <span>Addresses: {{ address }}</span>
@@ -150,7 +105,7 @@ onMounted(async () => {
       @click.prevent="handleSendClick"
       :disabled="isLoading"
     >
-      {{ isLoading ? 'Sending...' : 'Submit' }}
+      {{ isLoading ? "Sending..." : "Submit" }}
     </button>
     <div v-if="txHash">
       <span>Tx Hash: {{ txHash }}</span>
@@ -164,6 +119,7 @@ onMounted(async () => {
 <style scoped>
 .actions {
   display: flex;
+  justify-content: center;
   gap: 10px;
   padding-bottom: 10px;
 }

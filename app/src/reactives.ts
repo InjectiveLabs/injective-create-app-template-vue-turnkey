@@ -1,12 +1,8 @@
-import type { MsgBroadcaster } from '@injectivelabs/wallet-core'
-import type {
-  TurnkeyWalletStrategy
-} from '@injectivelabs/wallet-turnkey'
-import type {TurnkeyStatus} from '@injectivelabs/wallet-base'
+import type { MsgBroadcaster, BaseWalletStrategy } from '@injectivelabs/wallet-core/src/index.ts'
 import { ref } from 'vue'
 
-export const turnkeyStrategy = ref<TurnkeyWalletStrategy | null>(null)
+export const walletStrategy = ref<BaseWalletStrategy | null>(null)
 export const broadcaster = ref<MsgBroadcaster | null>(null)
-export const turnkeyStatus = ref<TurnkeyStatus | null>(null)
 export const address = ref<string | null>(null)
 export const oidcToken = ref<string | null>(null)
+export const walletStatus = ref<'starting' | 'ready' |  'waiting-otp' | 'logged-in'>('starting')

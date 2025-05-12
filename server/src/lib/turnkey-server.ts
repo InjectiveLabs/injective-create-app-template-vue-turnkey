@@ -171,6 +171,7 @@ export async function verifyEmailOtp({
       organizationId: suborgID,
       expiry: Date.now() + (sessionLengthSeconds ?? 9000) * 1000, // 900 is the default expiry time if you don't pass in a sessionLengthSeconds to the request. Request should probably return the expiry time, instead of hardcoding it.
       token: credentialBundle,
+      credentialBundle,
     }
     return session
   } catch (error) {
