@@ -33,7 +33,7 @@ onMounted(async () => {
         defaultOrganizationId: import.meta.env
           .VITE_TURNKEY_DEFAULT_ORGANIZATION_ID,
         apiBaseUrl: "https://api.turnkey.com",
-        apiServerEndpoint: "http://localhost:3000/",
+        apiServerEndpoint: "http://localhost:3000/api/v1",
       },
     },
   });
@@ -49,7 +49,7 @@ onMounted(async () => {
         defaultOrganizationId: import.meta.env
           .VITE_TURNKEY_DEFAULT_ORGANIZATION_ID,
         apiBaseUrl: "https://api.turnkey.com",
-        apiServerEndpoint: "http://localhost:3000/",
+        apiServerEndpoint: "http://localhost:3000/api/v1",
       },
     },
   });
@@ -82,6 +82,9 @@ onMounted(async () => {
 });
 
 async function selectWallet(wallet: Wallet.TurnkeyOauth | Wallet.TurnkeyOtp) {
+  if (!walletStrategy.value) {
+    return;
+  }
   walletStrategy.value.wallet = wallet;
 
   try {
@@ -104,7 +107,7 @@ async function selectWallet(wallet: Wallet.TurnkeyOauth | Wallet.TurnkeyOtp) {
 
     broadcaster.value = new MsgBroadcaster({
       network: injectiveClients.network,
-      walletStrategy,
+      walletStrategy: walletStrategy.value,
       ethereumChainId: injectiveClients.ethereumChainId!,
       endpoints: injectiveClients.endpoints,
     });

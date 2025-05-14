@@ -2,7 +2,7 @@
 import { onMounted, ref } from "vue";
 import { address, oidcToken, walletStatus, walletStrategy } from "../reactives";
 import { TurnkeyProvider, Wallet } from "@injectivelabs/wallet-base";
-import { generateGoogleUrl, setLocalStorageStrategy } from "../utils";
+import { setLocalStorageStrategy } from "../utils";
 import { WalletException } from "@injectivelabs/exceptions";
 
 const email = ref("");
@@ -34,12 +34,15 @@ async function handleEmailSubmit() {
 }
 
 async function handleOTPSubmit() {
+  if (!walletStrategy.value) {
+    throw new Error("Wallet strategy not found");
+  }
+
   console.log("OTP", OTP.value);
   walletStrategy.value.setMetadata({
     turnkey: {
       otpCode: OTP.value,
       otpId: otpID.value,
-      otpVerifyPath: "http://localhost:3000/turnkey/verify-email-auth",
     },
   });
 
@@ -67,27 +70,39 @@ async function handleGoogleOAuthClick() {
   if (!walletStrategy.value) {
     throw new Error("Wallet strategy not found");
   }
-  walletStrategy.value.wallet = Wallet.TurnkeyOauth;
-  const nonce = await walletStrategy.value.getSessionOrConfirm();
-
-  if (!nonce) {
-    throw new Error("Nonce not found");
+  if (!import.meta.env.VITE_GOOGLE_CLIENT_ID) {
+    throw new Error("Google client ID not found");
   }
 
-  const url = generateGoogleUrl(nonce);
+  walletStrategy.value.wallet = Wallet.TurnkeyOauth;
+  walletStrategy.value.setMetadata({
+    turnkey: {
+      googleClientId: import.meta.env.VITE_GOOGLE_CLIENT_ID,
+      googleRedirectUri: "http://localhost:5173",
+    },
+  });
+  const url = await walletStrategy.value.getSessionOrConfirm();
+
+  if (!url) {
+    throw new Error("URL not found");
+  }
 
   window.location.href = url;
 }
 
 onMounted(async () => {
-  // ? Watches for a token response form Google and logs in if its there
   if (oidcToken.value) {
+    if (!walletStrategy.value) {
+      return;
+    }
+    // ? Watches for a token response form Google and logs in if its there
     walletStrategy.value.wallet = Wallet.TurnkeyOauth;
     walletStrategy.value?.setMetadata({
       turnkey: {
         oidcToken: oidcToken.value,
         provider: TurnkeyProvider.Google,
-        oauthLoginPath: "http://localhost:3000/turnkey/oauth-login",
+        googleClientId: import.meta.env.VITE_GOOGLE_CLIENT_ID,
+        googleRedirectUri: "http://localhost:5173",
       },
     });
     const result = await walletStrategy.value

@@ -1,4 +1,4 @@
-import type { MsgBroadcaster, BaseWalletStrategy } from '@injectivelabs/wallet-core/src/index.ts'
+import type { MsgBroadcaster, BaseWalletStrategy } from '@injectivelabs/wallet-core'
 import { ref } from 'vue'
 
 export const walletStrategy = ref<BaseWalletStrategy | null>(null)

@@ -19,7 +19,7 @@ app.get('/', (c) => {
   return c.text('Hello Hono!')
 })
 
-const routes = app.route('/turnkey', turnkeyRoute)
+const routes = app.route('/api/v1/turnkey', turnkeyRoute)
 
 serve(
   {

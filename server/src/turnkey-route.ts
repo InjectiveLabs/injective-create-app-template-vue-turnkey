@@ -15,7 +15,7 @@ export const turnkeyRoute = new Hono()
     })
   })
   .post(
-    '/init-email-auth',
+    '/otp/init',
     zValidator(
       'json',
       z.object({
@@ -33,7 +33,7 @@ export const turnkeyRoute = new Hono()
     },
   )
   .post(
-    '/verify-email-auth',
+    '/otp/verify',
     zValidator(
       'json',
       z.object({
@@ -54,7 +54,7 @@ export const turnkeyRoute = new Hono()
     },
   )
   .post(
-    '/oauth-login',
+    '/oauth',
     zValidator(
       'json',
       z.object({
