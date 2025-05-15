@@ -123,6 +123,9 @@ export async function initEmailOtp(email: string) {
       contact: email,
       otpType: 'OTP_TYPE_EMAIL',
       organizationId,
+      emailCustomization: {
+        appName: 'Helix',
+      },
     })
 
     if (!response.otpId) {

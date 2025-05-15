@@ -3,6 +3,7 @@ import { BaseWalletStrategy, MsgBroadcaster } from "@injectivelabs/wallet-core";
 import {
   TurnkeyOauthWalletStrategy,
   TurnkeyOtpWalletStrategy,
+  TurnkeyWallet,
 } from "@injectivelabs/wallet-turnkey/src/index.ts";
 import { injectiveClients } from "./injective-clients";
 import { onMounted } from "vue";
@@ -11,6 +12,7 @@ import {
   address,
   broadcaster,
   oidcToken,
+  turnkeyWallet,
   walletStatus,
   walletStrategy,
 } from "./reactives";
@@ -18,8 +20,7 @@ import {
 import LoginForm from "./components/LoginForm.vue";
 import { getLocalStorageStrategy, setLocalStorageStrategy } from "./utils";
 import Connected from "./components/Connected.vue";
-
-const turnkeyAuthIframeContainerId = "turnkey-auth-iframe-container-id";
+import { turnkeyAuthIframeContainerId } from "./constants";
 
 onMounted(async () => {
   const turnkeyOAuthStrategy = new TurnkeyOauthWalletStrategy({
@@ -33,7 +34,7 @@ onMounted(async () => {
         defaultOrganizationId: import.meta.env
           .VITE_TURNKEY_DEFAULT_ORGANIZATION_ID,
         apiBaseUrl: "https://api.turnkey.com",
-        apiServerEndpoint: "http://localhost:3000/api/v1",
+        apiServerEndpoint: "https://api.ui.injective.network/api/v1",
       },
     },
   });
@@ -49,9 +50,16 @@ onMounted(async () => {
         defaultOrganizationId: import.meta.env
           .VITE_TURNKEY_DEFAULT_ORGANIZATION_ID,
         apiBaseUrl: "https://api.turnkey.com",
-        apiServerEndpoint: "http://localhost:3000/api/v1",
+        apiServerEndpoint: "https://api.ui.injective.network/api/v1",
       },
     },
+  });
+
+  turnkeyWallet.value = new TurnkeyWallet({
+    defaultOrganizationId: import.meta.env.VITE_TURNKEY_DEFAULT_ORGANIZATION_ID,
+    apiBaseUrl: "https://api.turnkey.com",
+    apiServerEndpoint: "https://api.ui.injective.network/api/v1",
+    iframeContainerId: turnkeyAuthIframeContainerId,
   });
 
   walletStrategy.value = new BaseWalletStrategy({
@@ -97,6 +105,7 @@ async function selectWallet(wallet: Wallet.TurnkeyOauth | Wallet.TurnkeyOtp) {
     }
 
     const addresses = await walletStrategy.value.getAddresses();
+    console.log("🪵 | selectWallet | addresses:", addresses);
     address.value = addresses[0];
 
     if (addresses.length > 0) {

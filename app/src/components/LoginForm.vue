@@ -81,13 +81,26 @@ async function handleGoogleOAuthClick() {
       googleRedirectUri: "http://localhost:5173",
     },
   });
-  const url = await walletStrategy.value.getSessionOrConfirm();
+  const urlOrSession = await walletStrategy.value.getSessionOrConfirm();
 
-  if (!url) {
+  if (urlOrSession.startsWith("http")) {
+    window.location.href = urlOrSession;
+    return;
+  }
+
+  console.log("🪵 | handleGoogleOAuthClick | urlOrSession:", urlOrSession);
+  if (!urlOrSession) {
     throw new Error("URL not found");
   }
 
-  window.location.href = url;
+  // Already exists here, just have to getAddresses
+  const addresses = await walletStrategy.value?.getAddresses();
+  console.log("🪵 | handleGoogleOAuthClick | addresses:", addresses);
+  if (addresses?.length && addresses?.length > 0) {
+    walletStatus.value = "logged-in";
+    setLocalStorageStrategy(Wallet.TurnkeyOauth);
+    address.value = addresses[0];
+  }
 }
 
 onMounted(async () => {
