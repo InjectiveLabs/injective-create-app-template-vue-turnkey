@@ -6,11 +6,23 @@ export function getLocalStorageStrategy() {
   return localStorage.getItem('turnkeyStrategy')
 }
 
+export function getLocalStorageAddress() {
+  return localStorage.getItem('injectiveAddress')
+}
+
 export function setLocalStorageStrategy(strategy: string| undefined) {
   if (!strategy) {
     localStorage.removeItem('turnkeyStrategy')
   } else {
     localStorage.setItem('turnkeyStrategy', strategy)
+  }
+}
+
+export function setLocalStorageAddress(address: string | undefined) {
+  if (!address) {
+    localStorage.removeItem('injectiveAddress')
+  } else {
+    localStorage.setItem('injectiveAddress', address)
   }
 }
 

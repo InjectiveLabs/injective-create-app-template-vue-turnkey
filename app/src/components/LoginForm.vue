@@ -1,9 +1,14 @@
 <script setup lang="ts">
 import { onMounted, ref } from "vue";
-import { address, oidcToken, walletStatus, walletStrategy } from "../reactives";
+import {
+  address,
+  oidcToken,
+  walletStatus,
+  walletStrategy,
+  turnkeyWallet,
+} from "../reactives";
 import { TurnkeyProvider, Wallet } from "@injectivelabs/wallet-base";
-import { setLocalStorageStrategy } from "../utils";
-import { WalletException } from "@injectivelabs/exceptions";
+import { setLocalStorageAddress, setLocalStorageStrategy } from "../utils";
 
 const email = ref("");
 const OTP = ref("");
@@ -18,18 +23,10 @@ async function handleEmailSubmit() {
     throw new Error("Wallet strategy not found");
   }
 
-  walletStrategy.value.wallet = Wallet.TurnkeyOtp;
-
-  walletStrategy.value.setMetadata({
-    turnkey: {
-      email: email.value,
-    },
-  });
-
-  const result = await walletStrategy.value.getSessionOrConfirm();
+  const result = await turnkeyWallet.value?.initOTP(email.value);
   if (result) {
     walletStatus.value = "waiting-otp";
-    otpID.value = result;
+    otpID.value = result.otpId;
   }
 }
 
@@ -39,18 +36,13 @@ async function handleOTPSubmit() {
   }
 
   console.log("OTP", OTP.value);
-  walletStrategy.value.setMetadata({
-    turnkey: {
-      otpCode: OTP.value,
-      otpId: otpID.value,
-    },
-  });
+  const result = await turnkeyWallet.value?.confirmOTP(OTP.value);
 
-  const result = await walletStrategy.value?.getAddresses();
-  if (result?.length && result?.length > 0) {
+  if (result && result.credentialBundle) {
+    setLocalStorageStrategy(Wallet.Turnkey);
+    const addresses = await walletStrategy.value?.getAddresses();
+    address.value = addresses[0];
     walletStatus.value = "logged-in";
-    setLocalStorageStrategy(Wallet.TurnkeyOtp);
-    address.value = result[0];
   }
 }
 
@@ -70,36 +62,30 @@ async function handleGoogleOAuthClick() {
   if (!walletStrategy.value) {
     throw new Error("Wallet strategy not found");
   }
+  if (!turnkeyWallet.value) {
+    throw new Error("Turnkey wallet not found");
+  }
   if (!import.meta.env.VITE_GOOGLE_CLIENT_ID) {
     throw new Error("Google client ID not found");
   }
-
-  walletStrategy.value.wallet = Wallet.TurnkeyOauth;
   walletStrategy.value.setMetadata({
     turnkey: {
       googleClientId: import.meta.env.VITE_GOOGLE_CLIENT_ID,
       googleRedirectUri: "http://localhost:5173",
     },
   });
-  const urlOrSession = await walletStrategy.value.getSessionOrConfirm();
+
+  const urlOrSession = await turnkeyWallet.value.initOAuth(
+    TurnkeyProvider.Google
+  );
 
   if (urlOrSession.startsWith("http")) {
     window.location.href = urlOrSession;
     return;
   }
 
-  console.log("🪵 | handleGoogleOAuthClick | urlOrSession:", urlOrSession);
   if (!urlOrSession) {
     throw new Error("URL not found");
-  }
-
-  // Already exists here, just have to getAddresses
-  const addresses = await walletStrategy.value?.getAddresses();
-  console.log("🪵 | handleGoogleOAuthClick | addresses:", addresses);
-  if (addresses?.length && addresses?.length > 0) {
-    walletStatus.value = "logged-in";
-    setLocalStorageStrategy(Wallet.TurnkeyOauth);
-    address.value = addresses[0];
   }
 }
 
@@ -109,33 +95,35 @@ onMounted(async () => {
       return;
     }
     // ? Watches for a token response form Google and logs in if its there
-    walletStrategy.value.wallet = Wallet.TurnkeyOauth;
+    walletStrategy.value.wallet = Wallet.Turnkey;
     walletStrategy.value?.setMetadata({
       turnkey: {
-        oidcToken: oidcToken.value,
-        provider: TurnkeyProvider.Google,
         googleClientId: import.meta.env.VITE_GOOGLE_CLIENT_ID,
         googleRedirectUri: "http://localhost:5173",
       },
     });
-    const result = await walletStrategy.value
-      ?.getSessionOrConfirm()
-      .catch((e: WalletException) => {
-        if (e instanceof WalletException) {
-          oauthError.value = e.message;
+
+    try {
+      const result = await turnkeyWallet.value?.confirmOAuth(
+        TurnkeyProvider.Google,
+        oidcToken.value
+      );
+
+      if (result) {
+        const addresses = await walletStrategy.value?.getAddresses();
+        if (addresses?.length && addresses?.length > 0) {
+          walletStatus.value = "logged-in";
+          setLocalStorageStrategy(Wallet.Turnkey);
+          setLocalStorageAddress(addresses[0]);
+          address.value = addresses[0];
         }
-      });
-    if (result) {
-      const addresses = await walletStrategy.value?.getAddresses();
-      if (addresses?.length && addresses?.length > 0) {
-        walletStatus.value = "logged-in";
-        setLocalStorageStrategy(Wallet.TurnkeyOauth);
-        address.value = addresses[0];
+      } else {
+        //  tell the use to login with  OTP, store a flag
+        oauthError.value =
+          "An error occurred. Try logging in with your original signup method.";
       }
-    } else {
-      //  tell the use to login with  OTP, store a flag
-      oauthError.value =
-        "An error occurred. Try logging in with your original signup method.";
+    } catch (e: any) {
+      oauthError.value = e.message;
     }
 
     // Clear all params from URL either way

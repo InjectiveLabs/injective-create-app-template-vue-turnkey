@@ -9,8 +9,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@injectivelabs/networks": "^1.15.2",
-    "@injectivelabs/sdk-ts": "^1.15.5",
+    "@injectivelabs/networks": "link:../../injective-ts/packages/networks",
+    "@injectivelabs/sdk-ts": "link:../../injective-ts/packages/sdk-ts",
     "@injectivelabs/wallet-base": "link:../../injective-ts/packages/wallets/wallet-base",
     "@injectivelabs/wallet-core": "link:../../injective-ts/packages/wallets/wallet-core",
     "@injectivelabs/wallet-turnkey": "link:../../injective-ts/packages/wallets/wallet-turnkey",
